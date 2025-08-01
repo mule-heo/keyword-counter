@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,14 +8,24 @@ import { Badge } from "@/components/ui/badge";
 export default function Page() {
   const [input, setInput] = useState("");
   const [chips, setChips] = useState<Record<string, number>>({});
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+    const handleFocus = () => {
+      inputRef.current?.focus();
+    };
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+  }, []);
 
   const addChip = () => {
-    const name = input.trim();
-    if (!name) return;
+    const keyword = input.trim();
+    if (!keyword) return;
 
     setChips((prev) => ({
       ...prev,
-      [name]: (prev[name] || 0) + 1,
+      [keyword]: (prev[keyword] || 0) + 1,
     }));
 
     setInput("");
@@ -25,10 +35,10 @@ export default function Page() {
     if (e.key === "Enter") addChip();
   };
 
-  const incrementChip = (name: string) => {
+  const incrementChip = (keyword: string) => {
     setChips((prev) => ({
       ...prev,
-      [name]: prev[name] + 1,
+      [keyword]: prev[keyword] + 1,
     }));
   };
 
@@ -37,21 +47,22 @@ export default function Page() {
       <div className="flex gap-2">
         <Input
           value={input}
+          ref={inputRef}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Enter text..."
+          placeholder="Enter keyword..."
         />
         <Button onClick={addChip}>Submit</Button>
       </div>
 
       <div className="flex flex-wrap gap-2">
-        {Object.entries(chips).map(([name, count]) => (
+        {Object.entries(chips).map(([keyword, count]) => (
           <Badge
-            key={name}
-            onClick={() => incrementChip(name)}
+            key={keyword}
+            onClick={() => incrementChip(keyword)}
             className="cursor-pointer"
           >
-            {name}: {count}
+            {keyword}: {count}
           </Badge>
         ))}
       </div>
